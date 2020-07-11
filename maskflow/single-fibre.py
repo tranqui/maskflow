@@ -3,9 +3,8 @@
 import sys, os
 import numpy as np
 from scipy import optimize
-#from impact_kuwabara import does_collide, efficiency
-#from impaction import does_collide, efficiency_from_theta, perturbative_impaction_efficiency
 from kuwabara import KuwabaraFlowField, penetration
+from copy import deepcopy
 
 import air as medium
 
@@ -121,11 +120,11 @@ if __name__ == '__main__':
     if args.analytical:
         f = np.vectorize(lambda r,st: flow.stechkina_lambda(r, st), signature='(),()->()')
         lam1 = f(R, args.stokes)
-        lam2 = lam1
+        lam2 = deepcopy(lam1)
     elif args.perturbative:
         f = np.vectorize(lambda r,st: flow.perturbative_impaction_efficiency(r, st), signature='(),()->()')
         lam1 = f(R, args.stokes)
-        lam2 = lam1
+        lam2 = deepcopy(lam1)
     else:
         f = np.vectorize(lambda r,st: find_theta(args.niters, flow, r, st, args.time, args.step, args.verbose), signature='(),()->(),()')
         lam1, lam2 = f(R, args.stokes)
@@ -135,9 +134,11 @@ if __name__ == '__main__':
 
     lam = 0.5 * (lam1 + lam2)
     lam_error = 0.5 * np.abs(lam2 - lam1)
+    lam_rescaled = lam / (2*args.fibre_radius)
+    lam_rescaled_error = lam / (2*args.fibre_radius)
 
     np.set_printoptions(12)
-    print('     lambda:', lam if not args.rescale else lam/(2*args.fibre_radius))
-    if args.error: print('      error:', lam_error if not args.rescale else lam_error/(2*args.fibre_radius))
+    print('     lambda:', lam if not args.rescale else lam_rescaled)
+    if args.error: print('      error:', lam_error if not args.rescale else lam_rescaled_error)
     if args.penetration > 0:
         print('penetration:', penetration(lam, args.penetration, 2*args.fibre_radius, args.alpha))
