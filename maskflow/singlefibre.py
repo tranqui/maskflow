@@ -3,10 +3,9 @@
 import sys, os
 import numpy as np
 from scipy import optimize
-from kuwabara import KuwabaraFlowField, penetration
-from copy import deepcopy
 
-import air as medium
+from .kuwabara import KuwabaraFlowField, penetration
+from . import air as medium
 
 water_density = 997 # kg/m^3
 particle_density = water_density
