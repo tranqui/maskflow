@@ -94,14 +94,12 @@ if __name__ == '__main__':
     parser.add_argument('-P', '--penetration', type=float, default=-1,
                         help='final penetration through filter of given thickness')
     
-    #method_group = parser.add_mutually_exclusive_group()
-    method_group = parser
-    method_group.add_argument('-e', '--error', action='store_true',
-                              help='display error in estimated efficiency in standard method')
-    method_group.add_argument('-a', '--analytical', action='store_true',
-                              help='evaluate the efficiency with approximate analytical formulas rather than by numerical integration')
-    method_group.add_argument('-p', '--perturbative', action='store_true',
-                              help='evaluate the efficiency using approximate perturbative theory')
+    parser.add_argument('-e', '--error', action='store_true',
+                        help='display error in estimated efficiency in standard method')
+    parser.add_argument('-a', '--analytical', action='store_true',
+                        help='evaluate the efficiency with approximate analytical formulas rather than by numerical integration')
+    parser.add_argument('-p', '--perturbative', action='store_true',
+                        help='evaluate the efficiency using approximate perturbative theory')
 
     parser.add_argument('radius', help='radius of particle (relative to fibre unless specified with -f)')
     parser.add_argument('alpha', type=float, help='volume fraction of filter')
