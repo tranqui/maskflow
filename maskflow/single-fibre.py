@@ -132,14 +132,12 @@ if __name__ == '__main__':
 
     lam1 *= args.fibre_radius
     lam2 *= args.fibre_radius
-    if args.rescale:
-        lam1 /= 2
-        lam2 /= 2
 
     lam = 0.5 * (lam1 + lam2)
     lam_error = 0.5 * np.abs(lam2 - lam1)
 
     np.set_printoptions(12)
-    print('     lambda:', lam)
-    if args.error: print('      error:', lam_error)
-    if args.penetration > 0: print('penetration:', penetration(lam, args.penetration, 2*args.radius, args.alpha))
+    print('     lambda:', lam if not args.rescale else lam/(2*args.fibre_radius))
+    if args.error: print('      error:', lam_error if not args.rescale else lam_error/(2*args.fibre_radius))
+    if args.penetration > 0:
+        print('penetration:', penetration(lam, args.penetration, 2*args.fibre_radius, args.alpha))
