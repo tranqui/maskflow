@@ -51,11 +51,11 @@ def refine_theta(flow, R, St, th1, th2, tmax, max_step, verbose=True):
     collides = flow.does_collide(R, St, th, tmax=tmax, max_step=max_step)
     if collides: th2 = th
     else: th1 = th
-    if verbose: print('updated bounds: %.8g %.8g' % (th1, th2), collides)
+    if verbose: sys.stderr.write('updated bounds: %.8g %.8g %r\n' % (th1, th2, collides))
     return th1, th2
 
-def find_theta(niters, flow, R, St, tmax, max_step, verbose=True):
-    if verbose: print('beginning iterations for St=%.8g...' % St)
+def find_theta(niters, flow, R, St, tmax, max_step, verbose=True, return_angles=False):
+    if verbose: sys.stderr.write('beginning iterations for R=%.8g St=%.8g...\n' % (R, St))
 
     theta1 = np.pi/2
     theta2 = np.pi
@@ -65,10 +65,12 @@ def find_theta(niters, flow, R, St, tmax, max_step, verbose=True):
     lam1 = flow.lambda_from_theta0(theta1)
     lam2 = flow.lambda_from_theta0(theta2)
 
-    return theta1, theta2, lam1, lam2
+    if return_angles: return theta1, theta2, lam1, lam2
+    else: return lam1, lam2
 
 if __name__ == '__main__':
     import argparse
+
     parser = argparse.ArgumentParser(description="""Determine single-fibre efficiency by finding the limiting trajectory. This involves optimising the initial condition to find the trajectory that just glances the fibre.
 
     By default efficiency is stated in terms of a parameter 'lambda', which measures the width of streamlines that result in collection at the fibre surface.""")
@@ -99,13 +101,14 @@ if __name__ == '__main__':
     method_group.add_argument('-p', '--perturbative', action='store_true',
                               help='evaluate the efficiency using approximate perturbative theory')
 
-    parser.add_argument('radius', type=float, help='radius of particle (relative to fibre unless specified with -f)')
+    parser.add_argument('radius', help='radius of particle (relative to fibre unless specified with -f)')
     parser.add_argument('alpha', type=float, help='volume fraction of filter')
 
     args = parser.parse_args()
+    args.radius = eval(args.radius)
     if args.diameter:
-        args.radius /= 2
-        args.fibre_radius /= 2
+        args.radius = args.radius / 2
+        args.fibre_radius = args.fibre_radius / 2
     R = args.radius / args.fibre_radius
 
     if not args.stokes:
@@ -114,15 +117,16 @@ if __name__ == '__main__':
     flow = KuwabaraFlowField(args.alpha)
 
     if args.analytical:
-        lam1 = flow.stechkina_lambda(R, args.stokes)
+        f = np.vectorize(lambda r,st: flow.stechkina_lambda(r, st), signature='(),()->()')
+        lam1 = f(R, args.stokes)
         lam2 = lam1
-        theta1 = theta2 = 0
     elif args.perturbative:
-        theta1, _, lam1 =  flow.perturbative_impaction_efficiency(R, args.stokes, return_angles=True)
+        f = np.vectorize(lambda r,st: flow.perturbative_impaction_efficiency(r, st), signature='(),()->()')
+        lam1 = f(R, args.stokes)
         lam2 = lam1
-        theta2 = theta1
     else:
-        theta1, theta2, lam1, lam2 = find_theta(args.niters, flow, R, args.stokes, args.time, args.step, args.verbose)
+        f = np.vectorize(lambda r,st: find_theta(args.niters, flow, r, st, args.time, args.step, args.verbose), signature='(),()->(),()')
+        lam1, lam2 = f(R, args.stokes)
 
     lam1 *= args.radius
     lam2 *= args.radius
@@ -133,4 +137,3 @@ if __name__ == '__main__':
     print('     lambda:', lam)
     if args.error: print('      error:', lam_error)
     if args.penetration > 0: print('penetration:', penetration(lam, args.penetration, 2*args.radius, args.alpha))
-
