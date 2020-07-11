@@ -94,7 +94,8 @@ if __name__ == '__main__':
     parser.add_argument('-P', '--penetration', type=float, default=-1,
                         help='final penetration through filter of given thickness')
     
-    method_group = parser.add_mutually_exclusive_group()
+    #method_group = parser.add_mutually_exclusive_group()
+    method_group = parser
     method_group.add_argument('-e', '--error', action='store_true',
                               help='display error in estimated efficiency in standard method')
     method_group.add_argument('-a', '--analytical', action='store_true',
@@ -117,28 +118,47 @@ if __name__ == '__main__':
 
     flow = KuwabaraFlowField(args.alpha)
 
-    if args.analytical:
-        f = np.vectorize(lambda r,st: flow.stechkina_lambda(r, st), signature='(),()->()')
-        lam1 = f(R, args.stokes)
-        lam2 = deepcopy(lam1)
-    elif args.perturbative:
-        f = np.vectorize(lambda r,st: flow.perturbative_impaction_efficiency(r, st), signature='(),()->()')
-        lam1 = f(R, args.stokes)
-        lam2 = deepcopy(lam1)
-    else:
-        f = np.vectorize(lambda r,st: find_theta(args.niters, flow, r, st, args.time, args.step, args.verbose), signature='(),()->(),()')
-        lam1, lam2 = f(R, args.stokes)
+    np.set_printoptions(12, suppress=True, linewidth=np.nan)
+
+    print('             particle_radius:', args.radius)
+    print('                fibre_radius:', args.fibre_radius)
+    print('                       alpha:', args.alpha) 
+    print()
+
+    f = np.vectorize(lambda r,st: find_theta(args.niters, flow, r, st, args.time, args.step, args.verbose), signature='(),()->(),()')
+    lam1, lam2 = f(R, args.stokes)
 
     lam1 *= args.fibre_radius
     lam2 *= args.fibre_radius
-
     lam = 0.5 * (lam1 + lam2)
-    lam_error = 0.5 * np.abs(lam2 - lam1)
-    lam_rescaled = lam / (2*args.fibre_radius)
-    lam_rescaled_error = lam / (2*args.fibre_radius)
+    print('                      lambda:', lam)
 
-    np.set_printoptions(12)
-    print('     lambda:', lam if not args.rescale else lam_rescaled)
-    if args.error: print('      error:', lam_error if not args.rescale else lam_rescaled_error)
+    if args.error:
+        lam_error = 0.5 * np.abs(lam2 - lam1)
+        print('                       error:', lam_error)
+
+    if args.analytical:
+        f = np.vectorize(lambda r,st: flow.stechkina_lambda(r, st), signature='(),()->()')
+        stechkina_lam = args.fibre_radius * f(R, args.stokes)
+        print('            stechkina_lambda:', stechkina_lam)
+
+    if args.perturbative:
+        f = np.vectorize(lambda r,st: flow.perturbative_impaction_efficiency(r, st), signature='(),()->()')
+        perturb_lam = args.fibre_radius * f(R, args.stokes)
+        print('         perturbative_lambda:', perturb_lam)
+
+    if args.rescale:
+        print()
+        lam_rescaled = lam / (2*args.fibre_radius)
+        lam_rescaled_error = lam / (2*args.fibre_radius)
+        print('             rescaled_lambda:', lam / (2*args.fibre_radius))
+        if args.error: print('         rescaled_lambda_err:', lam_error / (2*args.fibre_radius))
+        if args.analytical: print('   rescaled_stechkina_lambda:', stechkina_lam / (2*args.fibre_radius))
+        if args.perturbative: print('rescaled_perturbative_lambda:', perturb_lam / (2*args.fibre_radius))
+
     if args.penetration > 0:
-        print('penetration:', penetration(lam, args.penetration, 2*args.fibre_radius, args.alpha))
+        print()
+        print('              mask_thickness:', args.penetration)
+        print('                 penetration:', penetration(lam, args.penetration, 2*args.fibre_radius, args.alpha))
+        print('       stechkina_penetration:', penetration(stechkina_lam, args.penetration, 2*args.fibre_radius, args.alpha))
+        print('         perturb_penetration:', penetration(perturb_lam, args.penetration, 2*args.fibre_radius, args.alpha))
