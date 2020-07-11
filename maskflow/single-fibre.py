@@ -88,6 +88,8 @@ if __name__ == '__main__':
                         type=float, default=1, help='radius of fibre')
     parser.add_argument('-d', '--diameter', action='store_true',
                         help='stated length parameters are diameters rather than radii')
+    parser.add_argument('-R', '--rescale', action='store_true',
+                        help='rescale efficiency in terms of the fibre diameter')
     parser.add_argument('-S', '--stokes', type=float,
                         help='override the Stokes number for particle inertia (otherwise it is calculated from other parameters, assuming sizes are stated in microns)')
     parser.add_argument('-P', '--penetration', type=float, default=-1,
@@ -128,8 +130,12 @@ if __name__ == '__main__':
         f = np.vectorize(lambda r,st: find_theta(args.niters, flow, r, st, args.time, args.step, args.verbose), signature='(),()->(),()')
         lam1, lam2 = f(R, args.stokes)
 
-    lam1 *= args.radius
-    lam2 *= args.radius
+    lam1 *= args.fibre_radius
+    lam2 *= args.fibre_radius
+    if args.rescale:
+        lam1 /= 2
+        lam2 /= 2
+
     lam = 0.5 * (lam1 + lam2)
     lam_error = 0.5 * np.abs(lam2 - lam1)
 
