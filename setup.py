@@ -15,7 +15,7 @@ setuptools.setup(
     author_email="joshuarrr@protonmail.com",
     description="Code to evaluate filtration properties of face masks.",
     long_description=long_description,
-    license='MIT',
+    license='GPLv3',
     long_description_content_type="text/markdown",
     python_requires='>=3',
     packages=setuptools.find_packages(),
