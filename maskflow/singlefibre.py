@@ -4,8 +4,12 @@ import sys, os
 import numpy as np
 from scipy import optimize
 
-from .kuwabara import KuwabaraFlowField, penetration
-from . import air as medium
+try:
+    from .kuwabara import KuwabaraFlowField, penetration
+    from . import air as medium
+except:
+    from kuwabara import KuwabaraFlowField, penetration
+    import air as medium
 
 water_density = 997 # kg/m^3
 particle_density = water_density
