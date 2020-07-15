@@ -161,5 +161,5 @@ if __name__ == '__main__':
         print()
         print('              mask_thickness:', args.penetration)
         print('                 penetration:', penetration(lam, args.penetration, 2*args.fibre_radius, args.alpha))
-        print('       stechkina_penetration:', penetration(stechkina_lam, args.penetration, 2*args.fibre_radius, args.alpha))
-        print('         perturb_penetration:', penetration(perturb_lam, args.penetration, 2*args.fibre_radius, args.alpha))
+        if args.analytical: print('       stechkina_penetration:', penetration(stechkina_lam, args.penetration, 2*args.fibre_radius, args.alpha))
+        if args.perturbative: print('         perturb_penetration:', penetration(perturb_lam, args.penetration, 2*args.fibre_radius, args.alpha))
