@@ -5,6 +5,7 @@ import numpy as np
 current_dir = os.path.dirname(os.path.realpath(__file__))
 
 class RawData:
+    # data taken from https://www.engineersedge.com/physics/viscosity_of_air_dynamic_and_kinematic_14483.htm
     temp, density, specific_heat, thermal_conductivity, thermal_diffusivity, dynamic_viscosity, kinematic_viscosity, prandtl_number = np.genfromtxt('%s/air-properties.csv' % current_dir).T
 
     water_freezing = 273.15 # K
