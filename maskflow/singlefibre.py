@@ -11,7 +11,7 @@ except:
     from kuwabara import KuwabaraFlowField, penetration
     import air as medium
 
-water_density = 997 # kg/m^3
+water_density = 996 # kg/m^3, at room temperature
 particle_density = water_density
 
 elementary_charge = 1.602e-19 # C
@@ -19,7 +19,7 @@ boltzmann_constant = 1.38e-23 # J / K
 vacuum_permittivity = 8.854e-12 # F / m
 
 water_freezing = 273.15 # K
-standard_temp = water_freezing + 20
+standard_temp = water_freezing + 20 # room temperature
 body_temp = water_freezing + 37
 
 def slip_correction(diameter, temperature, A1=2.492, A2=0.84, A3=0.435):
