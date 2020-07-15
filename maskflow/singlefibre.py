@@ -46,7 +46,7 @@ def standard_stokes_number(particle_diameter, fibre_diameter,
     Returns:
         Stokes number for particle transport through medium.
     """
-    return particle_density * particle_diameter**2 * flow_speed * slip_correction(particle_diameter, temperature) / (18 * medium.dynamic_viscosity(temperature) * fibre_diameter)
+    return particle_density * particle_diameter**2 * flow_speed * slip_correction(particle_diameter, temperature) / (9 * medium.dynamic_viscosity(temperature) * fibre_diameter)
 
 def refine_theta(flow, R, St, th1, th2, tmax, max_step, verbose=True):
     th = 0.5*(th1 + th2)
