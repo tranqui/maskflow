@@ -11,7 +11,7 @@ except:
     from kuwabara import KuwabaraFlowField, penetration
     import air as medium
 
-water_density = 996 # kg/m^3, at room temperature
+water_density = 998 # kg/m^3, at room temperature
 particle_density = water_density
 
 elementary_charge = 1.602e-19 # C
@@ -81,13 +81,13 @@ if __name__ == '__main__':
                         action='store_true', default=False,
                         help='print status messages to stdout detailing iteration steps')
     parser.add_argument('-n', '--niters', type=int, default=25,
-                        help='number of iterations (trajectories) in optimisation procedure which determines the error in the method (each iteration adds approximately one bit of accuracy)')
+                        help='number of iterations (trajectories) in optimisation procedure which determines the error in the method (each iteration adds approximately one bit of accuracy) (default=25)')
     parser.add_argument('-t', '--time', type=float, default=1e3,
-                        help='maximum integration time (in simulation units)')
+                        help='maximum integration time in simulation units (default=1e3)')
     parser.add_argument('-s', '--step', type=float, default=0.1,
-                        help='maximum step size of simulation')
+                        help='maximum step size of simulation (default=0.1)')
     parser.add_argument('-f', '--fibre-radius', dest='fibre_radius',
-                        type=float, default=1, help='radius of fibre')
+                        type=float, default=1, help='radius of fibre (default=1)')
     parser.add_argument('-d', '--diameter', action='store_true',
                         help='stated length parameters are diameters rather than radii')
     parser.add_argument('-R', '--rescale', action='store_true',
@@ -124,6 +124,9 @@ if __name__ == '__main__':
     print('             particle_radius:', args.radius)
     print('                fibre_radius:', args.fibre_radius)
     print('                       alpha:', args.alpha) 
+    print('         hydrodynamic_factor:', flow.hydrodynamic_factor)
+    print('                      stokes:', args.stokes)
+    print('              outer_boundary:', flow.l * args.fibre_radius)
     print()
 
     f = np.vectorize(lambda r,st: find_theta(args.niters, flow, r, st, args.time, args.step, args.verbose), signature='(),()->(),()')
