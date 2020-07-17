@@ -54,6 +54,20 @@ class KuwabaraFlowField:
         """Angular component of flow field."""
         return -np.sin(th) * self.fp(r)
 
+    def u_cartesian(self, r, th):
+        """Cartesian components of flow field."""
+        u = self.u(r, th)
+        v = self.v(r, th)
+        ux = u*np.cos(th) - v*np.sin(th)
+        uy = u*np.sin(th) + v*np.cos(th)
+        return ux, uy
+
+    def u_cartesian2(self, x, y):
+        """Cartesian components of flow field from cartesian position."""
+        r = np.sqrt(x**2 + y**2)
+        theta = np.arctan2(y, x)
+        return self.u_cartesian(r, theta)
+
     def u_perturb(self, r, th, St):
         """Radial component of particle velocity when treating inertia as a perturbation."""
         return self.u(r, th) + St * (self.f(r) - r*self.fp(r)) * (self.f(r)*np.cos(th)**2 - r*self.fp(r)*np.sin(th)**2) / r**3
@@ -173,25 +187,37 @@ class KuwabaraFlowField:
         return limit_trajectory[1:] if return_angles else limit_trajectory[-1]
 
     def find_trajectory_full(self, R, St, r0, th0, tmax=100, max_step=1):
-        du = lambda r,th,uu,vv,St: -(uu - self.u(r,th))/St
-        dv = lambda r,th,uu,vv,St: -(vv - self.v(r,th))/St
+        dudt = lambda r,th,ur,ut: -(ur - self.u(r,th))/St + ut**2/r
+        dvdt = lambda r,th,ur,ut: -(ut - self.v(r,th))/St - ur*ut/r
+        duvdt = lambda r,th,ur,ut: [dudt(r,th,ur,ut), dvdt(r,th,ur,ut)]
+        dxdt2 = lambda r,th,ur,ut: np.array([ur, ut/r, *duvdt(r,th,ur,ut)])
+        dxdt = lambda t,x: dxdt2(*x)
 
-        dxdt = lambda t,x,St: np.array([x[2], x[3]/x[0], du(*x, St), dv(*x, St)]).T
+        # Jacobians are needed for some solvers, but not for RK45 (the current/default solver)
+        # jacobian = lambda r,th,ur,ut,f,fp,fpp: \
+        #     np.array([[0, 0, 1, 0],
+        #               [-ut/r**2, 0, 0, 1/r],
+        #               [-(ut/r)**2 + np.cos(th)*(fp - f/r)/r/St, -np.sin(th)*f/r/St, -1/St, 2*ut/r],
+        #               [ur*ut/r**2 - np.sin(th)*fpp/St, -np.cos(th)*fp/St, -ut/r, -ur/r - 1/St]])
+        # jacobian = lambda t,x: jacobian2(*x, self.f(x[0]), self.fp(x[0]), self.fpp(x[0]))
 
-        penetrate = lambda t,x,St: self.l - x[0]
+        r = lambda r,th,ur,ut: r
+        theta = lambda r,th,ur,ut: th
+        penetrate = lambda t,x: self.l - r(*x)
+        collide = lambda t,x: r(*x) - (1+R)
+        wrong_direction = lambda t,x: x[2]*self.u(x[0],x[1]) + x[3]*self.v(x[0],x[1]) + 0.9
+
         penetrate.terminal = True
         penetrate.direction = -1
-        collide = lambda t,x,St: x[0] - (1+R)
         collide.terminal = True
         collide.direction = -1
-        wrong_direction = lambda t,x,St: x[2]*self.u(x[0],x[1]) + x[3]*self.v(x[0],x[1]) + 0.9
         wrong_direction.terminal = True
         wrong_direction.direction = -1
         events = (penetrate,collide,wrong_direction)
 
         with np.errstate(divide='ignore', invalid='ignore'):
             x0 = [r0, th0, self.u(r0,th0), self.v(r0,th0)]
-            trajectory = integrate.solve_ivp(dxdt, [0, tmax], x0, args=(St,),
+            trajectory = integrate.solve_ivp(dxdt, [0, tmax], x0, #jac=jacobian,
                                              events=events, max_step=max_step,
                                              vectorized=True, dense_output=True)
 
@@ -208,6 +234,7 @@ if __name__ == '__main__':
 
     alpha = 0.1
     R = 0.2
+    alpha = 0.15
     flow = KuwabaraFlowField(alpha)
 
     plt.figure()
