@@ -26,6 +26,8 @@ def slip_correction(diameter, temperature, A1=2.492, A2=0.84, A3=0.435):
     """
     Slip correction for Stokes flow past a sphere (of Cunningham form).
 
+    We take default parameters from Kanaoka (1987) DOI: 10.1080/02786828708959142.
+
     Args:
         diameter: particle diameter (m)
         A1, A2, A3: empirical correction parameters.
@@ -99,6 +101,8 @@ if __name__ == '__main__':
     
     parser.add_argument('-e', '--error', action='store_true',
                         help='display error in estimated efficiency in standard method')
+    parser.add_argument('-i', '--interception', action='store_true',
+                        help='show efficiency in pure interception mechanism')
     parser.add_argument('-a', '--analytical', action='store_true',
                         help='evaluate the efficiency with approximate analytical formulas rather than by numerical integration')
     parser.add_argument('-p', '--perturbative', action='store_true',
@@ -120,6 +124,8 @@ if __name__ == '__main__':
     flow = KuwabaraFlowField(args.alpha)
 
     np.set_printoptions(12, suppress=True, linewidth=np.nan)
+    # add a comma between entries to aid parsing
+    np.set_string_function(lambda x: repr(x).replace('(', '').replace(')', '').replace('array', '').replace("       ", ' ') , repr=False)
 
     print('             particle_radius:', args.radius)
     print('                fibre_radius:', args.fibre_radius)
@@ -141,6 +147,11 @@ if __name__ == '__main__':
         lam_error = 0.5 * np.abs(lam2 - lam1)
         print('                       error:', lam_error)
 
+    if args.interception:
+        f = np.vectorize(lambda r: flow.interception_lambda(r), signature='()->()')
+        interception_lam = args.fibre_radius * f(R)
+        print('         interception_lambda:', interception_lam)
+
     if args.analytical:
         f = np.vectorize(lambda r,st: flow.stechkina_lambda(r, st), signature='(),()->()')
         stechkina_lam = args.fibre_radius * f(R, args.stokes)
@@ -157,6 +168,7 @@ if __name__ == '__main__':
         lam_rescaled_error = lam / (2*args.fibre_radius)
         print('             rescaled_lambda:', lam / (2*args.fibre_radius))
         if args.error: print('         rescaled_lambda_err:', lam_error / (2*args.fibre_radius))
+        if args.interception: print('rescaled_interception_lambda:', interception_lam / (2*args.fibre_radius))
         if args.analytical: print('   rescaled_stechkina_lambda:', stechkina_lam / (2*args.fibre_radius))
         if args.perturbative: print('rescaled_perturbative_lambda:', perturb_lam / (2*args.fibre_radius))
 
@@ -164,5 +176,6 @@ if __name__ == '__main__':
         print()
         print('              mask_thickness:', args.penetration)
         print('                 penetration:', penetration(lam, args.penetration, 2*args.fibre_radius, args.alpha))
+        if args.interception: print('    interception_penetration:', penetration(interception_lam, args.penetration, 2*args.fibre_radius, args.alpha))
         if args.analytical: print('       stechkina_penetration:', penetration(stechkina_lam, args.penetration, 2*args.fibre_radius, args.alpha))
         if args.perturbative: print('         perturb_penetration:', penetration(perturb_lam, args.penetration, 2*args.fibre_radius, args.alpha))
