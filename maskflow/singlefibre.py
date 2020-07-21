@@ -98,6 +98,8 @@ if __name__ == '__main__':
                         help='override the Stokes number for particle inertia (otherwise it is calculated from other parameters, assuming sizes are stated in microns)')
     parser.add_argument('-P', '--penetration', type=float, default=-1,
                         help='final penetration through filter of given thickness')
+    parser.add_argument('-Y', '--yaml', action='store_true',
+                        help='output in a fully YAML-compliant format')
     
     parser.add_argument('-e', '--error', action='store_true',
                         help='display error in estimated efficiency in standard method')
@@ -112,6 +114,13 @@ if __name__ == '__main__':
     parser.add_argument('alpha', type=float, help='volume fraction of filter')
 
     args = parser.parse_args()
+
+    if args.yaml:
+        # If enabled force YAML compliant output by removing whitespace at start of printed data.
+        import builtins as __builtin__
+        def print(*args, **kwargs):
+            __builtin__.print(*[a.strip() if type(a) == str else a for a in args])
+
     args.radius = eval(args.radius)
     if args.diameter:
         args.radius = args.radius / 2
