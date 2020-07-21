@@ -98,14 +98,14 @@ class KuwabaraFlowField:
         Returns:
             lambda parameter in units of fibre radius
         """
-        J = ((29.6 - 28*self.alpha**0.62) * R**2 - 27.5 * R**2.8)
 
         # Hinds (1999) suggests to take the maximum value as a threshold, as the above expression for J is non-monotonic.
         Rmax = 0.00438416 * (59.2 - 56*self.alpha**0.62)**1.25
         Jmax = ((29.6 - 28*self.alpha**0.62) * Rmax**2 - 27.5 * Rmax**2.8)
-        if R > Rmax: J = Jmax
+        J_func = lambda r: ((29.6 - 28*self.alpha**0.62) * r**2 - 27.5 * r**2.8) if r < Rmax else Jmax
+        J_func = np.vectorize(J_func)
 
-        impaction = St / (2*self.hydrodynamic_factor**2) * J
+        impaction = St / (2*self.hydrodynamic_factor**2) * J_func(R)
         return self.interception_lambda(R) + impaction
 
     def lambda_from_theta0(self, theta0):
