@@ -38,7 +38,7 @@ def slip_correction(diameter, temperature, A1=2.492, A2=0.84, A3=0.435):
     return 1 + l/diameter * (A1 + A2 * np.exp(-A3*diameter/l))
 
 def standard_stokes_number(particle_diameter, fibre_diameter,
-                           flow_speed=0.1, temperature=standard_temp):
+                           flow_speed=0.27, temperature=standard_temp):
     """
     Args:
         particle_diameter: particle diameter (m)
