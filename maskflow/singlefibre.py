@@ -38,7 +38,7 @@ def slip_correction(diameter, temperature, A1=2.492, A2=0.84, A3=0.435):
     return 1 + l/diameter * (A1 + A2 * np.exp(-A3*diameter/l))
 
 def standard_stokes_number(particle_diameter, fibre_diameter,
-                           flow_speed=0.27, temperature=standard_temp):
+                           flow_speed, temperature=standard_temp):
     """
     Args:
         particle_diameter: particle diameter (m)
@@ -72,6 +72,18 @@ def find_theta(niters, flow, R, St, tmax, max_step, verbose=True, return_angles=
     if return_angles: return theta1, theta2, lam1, lam2
     else: return lam1, lam2
 
+def find_lambda(niters, flow, R, stokes, tmax, max_step, verbose=True):
+    rmax = 1 / np.sqrt(flow.alpha) - 1
+    lmax = 2 / np.sqrt(flow.alpha)
+    f = np.vectorize(lambda r,st: find_theta(niters, flow, r, st, tmax, max_step, verbose) if r < rmax else (lmax, lmax), signature='(),()->(),()')
+    #f = np.vectorize(lambda r,st: find_theta(niters, flow, r, st, tmax, max_step, verbose) if r < rmax else (flow.interception_lambda(r), flow.interception_lambda(r)), signature='(),()->(),()')
+    lam1, lam2 = f(R, stokes)
+
+    lam = 0.5 * (lam1 + lam2)
+    lam_error = 0.5 * np.abs(lam2 - lam1)
+
+    return lam, lam_error
+
 if __name__ == '__main__':
     import argparse
 
@@ -96,6 +108,8 @@ if __name__ == '__main__':
                         help='rescale efficiency in terms of the fibre diameter')
     parser.add_argument('-S', '--stokes', type=float,
                         help='override the Stokes number for particle inertia (otherwise it is calculated from other parameters, assuming sizes are stated in microns)')
+    parser.add_argument('-F', '--flow-speed', type=float, default=0.027,
+                        help='flow speed (m/s) used in Stokes number calculation (default=0.27)')
     parser.add_argument('-P', '--penetration', type=float, default=-1,
                         help='final penetration through filter of given thickness')
     parser.add_argument('-Y', '--yaml', action='store_true',
@@ -130,7 +144,7 @@ if __name__ == '__main__':
     R = args.radius / args.fibre_radius
 
     if not args.stokes:
-        args.stokes = standard_stokes_number(2e-6*args.radius, 2e-6*args.fibre_radius)
+        args.stokes = standard_stokes_number(2e-6*args.radius, 2e-6*args.fibre_radius, args.flow_speed)
 
     flow = KuwabaraFlowField(args.alpha)
 
@@ -147,26 +161,20 @@ if __name__ == '__main__':
     print()
 
     if args.full:
-        f = np.vectorize(lambda r,st: find_theta(args.niters, flow, r, st, args.time, args.step, args.verbose), signature='(),()->(),()')
-        lam1, lam2 = f(R, args.stokes)
+        lam, lam_error = find_lambda(args.niters, flow, R, args.stokes, args.time, args.step, args.verbose)
 
-        lam1 *= args.fibre_radius
-        lam2 *= args.fibre_radius
-        lam = 0.5 * (lam1 + lam2)
+        lam *= args.fibre_radius
+        lam_error *= args.fibre_radius
+
         print('                      lambda:', lam)
-
-        if args.error:
-            lam_error = 0.5 * np.abs(lam2 - lam1)
-            print('                       error:', lam_error)
+        if args.error: print('                       error:', lam_error)
 
     if args.interception:
-        f = np.vectorize(lambda r: flow.interception_lambda(r), signature='()->()')
-        interception_lam = args.fibre_radius * f(R)
+        interception_lam = args.fibre_radius * flow.interception_lambda(R)
         print('         interception_lambda:', interception_lam)
 
     if args.analytical:
-        f = np.vectorize(lambda r,st: flow.stechkina_lambda(r, st), signature='(),()->()')
-        stechkina_lam = args.fibre_radius * f(R, args.stokes)
+        stechkina_lam = args.fibre_radius * flow.stechkina_lambda(R, st)
         print('            stechkina_lambda:', stechkina_lam)
 
     if args.perturbative:
