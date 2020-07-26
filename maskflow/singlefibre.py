@@ -93,7 +93,7 @@ if __name__ == '__main__':
 
     parser.add_argument('-v', '--verbose',
                         action='store_true', default=False,
-                        help='print status messages to stdout detailing iteration steps')
+                        help='print status messages to stderr detailing iteration steps')
     parser.add_argument('-n', '--niters', type=int, default=25,
                         help='number of iterations (trajectories) in optimisation procedure which determines the error in the method (each iteration adds approximately one bit of accuracy) (default=25)')
     parser.add_argument('-t', '--time', type=float, default=1e3,
