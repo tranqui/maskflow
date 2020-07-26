@@ -156,6 +156,7 @@ if __name__ == '__main__':
     print('                fibre_radius:', args.fibre_radius)
     print('                       alpha:', args.alpha) 
     print('         hydrodynamic_factor:', flow.hydrodynamic_factor)
+    print('                  flow_speed:', args.flow_speed)
     print('                      stokes:', args.stokes)
     print('              outer_boundary:', flow.l * args.fibre_radius)
     print()
