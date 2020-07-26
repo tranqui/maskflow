@@ -109,7 +109,7 @@ if __name__ == '__main__':
     parser.add_argument('-S', '--stokes', type=float,
                         help='override the Stokes number for particle inertia (otherwise it is calculated from other parameters, assuming sizes are stated in microns)')
     parser.add_argument('-F', '--flow-speed', type=float, default=0.027,
-                        help='flow speed (m/s) used in Stokes number calculation (default=0.27)')
+                        help='flow speed (m/s) used in Stokes number calculation (default=0.027)')
     parser.add_argument('-P', '--penetration', type=float, default=-1,
                         help='final penetration through filter of given thickness')
     parser.add_argument('-Y', '--yaml', action='store_true',
