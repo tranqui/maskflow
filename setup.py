@@ -5,7 +5,11 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-requirements = ["numpy", "scipy"]
+requirements = []
+required_modules = ["numpy", "scipy", "natsort"]
+for module in required_modules:
+    try: exec("import %s" % module)
+    except: requirements += [module]
 
 setuptools.setup(
     name="maskflow",
