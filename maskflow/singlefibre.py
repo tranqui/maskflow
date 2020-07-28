@@ -110,6 +110,8 @@ if __name__ == '__main__':
                         help='override the Stokes number for particle inertia (otherwise it is calculated from other parameters, assuming sizes are stated in microns)')
     parser.add_argument('-F', '--flow-speed', type=float, default=0.027,
                         help='flow speed (m/s) used in Stokes number calculation (default=0.027)')
+    parser.add_argument('--face', action='store_true',
+                        help='flow speed given is interpretted as a face speed, and the flow speed is calculated as face_speed / (1 - alpha)')
     parser.add_argument('-P', '--penetration', type=float, default=-1,
                         help='final penetration through filter of given thickness')
     parser.add_argument('-Y', '--yaml', action='store_true',
@@ -143,9 +145,6 @@ if __name__ == '__main__':
         args.fibre_radius = args.fibre_radius / 2
     R = args.radius / args.fibre_radius
 
-    if not args.stokes:
-        args.stokes = standard_stokes_number(2e-6*args.radius, 2e-6*args.fibre_radius, args.flow_speed)
-
     flow = KuwabaraFlowField(args.alpha)
 
     np.set_printoptions(12, suppress=True, linewidth=np.nan)
@@ -156,10 +155,16 @@ if __name__ == '__main__':
     print('                fibre_radius:', args.fibre_radius)
     print('                       alpha:', args.alpha) 
     print('         hydrodynamic_factor:', flow.hydrodynamic_factor)
+    if args.face:
+        print('                  face_speed:', args.flow_speed)
+        args.flow_speed /= (1-args.alpha)
     print('                  flow_speed:', args.flow_speed)
     print('                      stokes:', args.stokes)
     print('              outer_boundary:', flow.l * args.fibre_radius)
     print()
+
+    if not args.stokes:
+        args.stokes = standard_stokes_number(2e-6*args.radius, 2e-6*args.fibre_radius, args.flow_speed)
 
     if args.full:
         lam, lam_error = find_lambda(args.niters, flow, R, args.stokes, args.time, args.step, args.verbose)
