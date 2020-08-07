@@ -1,5 +1,5 @@
 # maskflow
-## Code to evaluate filtration properties of face masks.
+## Python package to evaluate filtration properties of face masks and coverings.
 
 ## Installation
 
@@ -8,6 +8,8 @@ Inside the source directory execute:
     pip install --user .
 
 ## Usage
+
+### Single-fibre efficiency
 
 We provide a script `single-fibre.py` for assessing single-fibre efficiencies. Inside the source folder navigate to the `maskflow` subfolder, and run e.g.:
 
@@ -25,3 +27,11 @@ To run this over a range of particle sizes you can directly pass numpy expressio
     ./single-fibre.py -df 10 "np.linspace(1,5,5)" 0.15
 
 Execute this script with the help flag `-h` to see a full list of options.
+
+### Total mask efficiency
+
+TBD.
+
+### Lattice-Boltzmann simulations
+
+TBD
