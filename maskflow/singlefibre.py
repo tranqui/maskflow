@@ -27,7 +27,7 @@ def slip_correction(diameter, temperature, A1=2.492, A2=0.84, A3=0.435):
     Slip correction for Stokes flow past a sphere (of Cunningham form).
 
     We take default parameters from:
-      - Lee & Liu (1987) DOI: 10.1080/00022470.1980.10464592.
+      - Lee & Liu (1980) DOI: 10.1080/00022470.1980.10464592.
       - Kanaoka et al. (1987) DOI: 10.1080/02786828708959142.
 
     Args:
