@@ -15,20 +15,23 @@ If you have any questions/issues, please don't hesitate to contact the authors d
 - Joshua F. Robinson ([joshua.robinson@bristol.ac.uk](mailto:joshua.robinson@bristol.ac.uk), [GitHub page](https://github.com/tranqui))
 - Richard P. Sear ([r.sear@surrey.ac.uk](mailto:r.sear@surrey.ac.uk), [website](https://www.richardsear.me))
 
+## Prerequisites
 
-## Installation
-
-Inside the source directory execute:
-
-    pip install --user .
+This package assumes python 3 is your default python executable. If you have other versions of python on your system you may need to run the scripts with the `python3` executable (instead of simply `python`).
 
 ## Usage
 
-### Single-fibre efficiency
+This package determines the efficiency of filters in two different flow fields:
+* The Kuwabara flow field, an analytic approximation to the neighbourhood around fibres and are much faster for calculations, and
+* Lattice-Boltzmann flow fields, which are essentially exact (subject to the geometrical approximations used in their construction).
+
+These flow fields are described in detail in our manuscript linked to [above](#overview). The next few sections show how to use the default scripts to produce results shown in the manuscript.
+
+### Kuwabara: Single-fibre efficiency
 
 We provide a script `single-fibre.py` for assessing single-fibre efficiencies. Inside the source folder navigate to the `maskflow` subfolder, and run e.g.:
 
-    ./single-fibre.py -df 10 5.325 0.15 -P 1000
+    python ./single-fibre.py -df 10 5.325 0.15 -P 1000
 
 Explanation of options in this example:
 - `-d` indicates that sizes of particle and fibre are given for diameters (otherwise radius is assumed)
@@ -39,11 +42,11 @@ By default the program will perform find the limiting trajectory of particle flo
 
 To run this over a range of particle sizes you can directly pass numpy expressions in the particle size field, i.e.:
 
-    ./single-fibre.py -df 10 "np.linspace(1,5,5)" 0.15
+    python ./single-fibre.py -df 10 "np.linspace(1,5,5)" 0.15
 
 Execute this script with the help flag `-h` to see a full list of options.
 
-### Total mask efficiency
+### Kuwabara: Total mask efficiency
 
 TBD.
 
@@ -52,15 +55,15 @@ TBD.
 To calculate a lambda:
 
 1. First run LB code to obtain a flow field.
-Edit the params.yaml to set all the parameters needed for the flow field - which is all parameters except the particle diameter. To calculate the flow field for a lambda calculation set single_fibre to True. Then run LB_maskAug2020.py with:
+Edit the params.yaml to set all the parameters needed for the flow field - which is all parameters except the particle diameter. To calculate the flow field for a lambda calculation set single_fibre to True. From the source directory navigate to the `maskflow` subfolder then execute:
 
-        python ./LB_maskAug2020.py
+        python ./latticeboltzmann.py
 
-    params.yaml in same directory. Here I assume you have python3 is default, if not try python3. You should check that towards the end of the run, the flow field is hardly changing. It should then be near steady state. The LB code will write out a .npz file
+    params.yaml in same directory. You should check that towards the end of the run, the flow field is hardly changing. It should then be near steady state. The LB code will write out a .npz file
 
-2. Second run traj_calc_maskAug2020.py to obtain lambda for given particle diameter, in the LB flow field:
+2. Second obtain lambda for given particle diameter, in the LB flow field by executing:
 
-        python ./traj_calc_maskAug2020.py
+        python ./lbparticletraj.py
 
     for the required particle diameter, with the .npz in the same directory. This will calculate the lambda.
 
@@ -90,3 +93,16 @@ At the end the code writes to filter_eff.txt, one line with, in order:
 * LB lattice constant in micrometres
 * alpha (area fraction)
 * filter thickness in LB lattice units
+
+## Using the package as a library
+
+Instead of running the pre-built scripts, you can install the package and import the modules for use in your own code. To install the package, navigate to the source directory and execute:
+
+    pip install --user .
+
+Then you should be able to import the various modules in your own code, e.g.
+
+    from maskflow import kuwabara
+    flow_field = kuwabara.KuwabaraFlowField(alpha=0.1)
+
+will create a Kuwbara flow field with an occupied volume fraction of 10%. See our manuscript linked to [above](#overview) for description of the theory, and the code itself for documentation of functionality.
