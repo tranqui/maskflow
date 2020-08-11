@@ -1,0 +1,7 @@
+maxIter : 50000
+d_f : 15.0e-6
+U0 : 2.65e-2
+r : 20
+alpha : 0.1
+tau : 1.0
+single_fibre : False
