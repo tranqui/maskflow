@@ -1,5 +1,5 @@
 # maskflow
-## A python package to evaluate filtration properties of face masks and coverings.
+## A python package to evaluate the filtration properties of face masks and coverings.
 
 ## Overview
 
@@ -40,9 +40,11 @@ Explanation of options in this example:
 
 By default the program will perform find the limiting trajectory of particle flow onto the fibre by an optimisation procedure fully incorporating inertia into the dynamics. Alternatively, passing the option `-p` will force the script to treat inertia as a perturbation around the background flow field. Finally, the option `-a` will instead use an analytical expression for efficiency due to Stechkina (1969).
 
-To run this over a range of particle sizes you can directly pass numpy expressions in the particle size field, i.e.:
+To run this over a range of particle sizes you can directly pass numpy expressions in the particle size field, e.g.:
 
     python ./single-fibre.py -df 10 "np.linspace(1,5,5)" 0.15
+
+will evaluate the filtration performance of 10 micron diameter fibres with incoming particles of 1, 2, 3, 4 and 5 microns.
 
 Execute this script with the help flag `-h` to see a full list of options.
 
