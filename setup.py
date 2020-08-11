@@ -13,7 +13,7 @@ for module in required_modules:
 
 setuptools.setup(
     name="maskflow",
-    version="0.1",
+    version="v1.0.0",
     author="joshuarrr",
     install_requires=requirements,
     author_email="joshuarrr@protonmail.com",
