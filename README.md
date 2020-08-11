@@ -3,7 +3,7 @@
 
 ## Overview
 
-> ## ![](http://www.emoji.co.uk/files/phantom-open-emojis/symbols-phantom/13025-warning-sign.png) 11th August 2020: We are continually improving this code and its documentation, so check back later for improvements
+> ## <img src="https://www.emoji.co.uk/files/phantom-open-emojis/symbols-phantom/13025-warning-sign.png" width="50" height="50" /> 11th August 2020: We are continually improving this code and its documentation, so check back later for improvements.
 
 This package accompanies a manuscript available on a preprint server (awaiting submission to an academic journal):
 
@@ -56,23 +56,23 @@ Edit the params.yaml to set all the parameters needed for the flow field - which
 
         python ./LB_maskAug2020.py
 
-params.yaml in same directory. Here I assume you have python3 is default, if not try python3. You should check that towards the end of the run, the flow field is hardly changing. It should then be near steady state. The LB code will write out a .npz file
+    params.yaml in same directory. Here I assume you have python3 is default, if not try python3. You should check that towards the end of the run, the flow field is hardly changing. It should then be near steady state. The LB code will write out a .npz file
 
 2. Second run traj_calc_maskAug2020.py to obtain lambda for given particle diameter, in the LB flow field:
 
         python ./traj_calc_maskAug2020.py
 
-for the required particle diameter, with the .npz in the same directory. This will calculate the lambda.
+    for the required particle diameter, with the .npz in the same directory. This will calculate the lambda.
 
 At the end the code writes to lambda.txt, one line with, in order:
 
-Stokes number
-ratio particle diameter/fibre diameter
-fibre diameter in micrometres
-particle diameter in micrometres
-lambda in micrometres
-LB lattice constant in micrometres
-alpha (area fraction)
+* Stokes number
+* ratio particle diameter/fibre diameter
+* fibre diameter in micrometres
+* particle diameter in micrometres
+* lambda in micrometres
+* LB lattice constant in micrometres
+* alpha (area fraction)
 
 
 To calculate a penetration:
