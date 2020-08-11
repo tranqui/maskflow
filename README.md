@@ -11,7 +11,7 @@ This package accompanies a manuscript available on a preprint server (awaiting s
 
 The theory is described in detail there, along with references for further reading.
 
-If you have any questions/issues, please don't hesitate to contact the authors directly:
+Bug reports can be reported to the [issues page](https://github.com/tranqui/maskflow/issues) and we will work to promptly fix them. For more general questions/comments, please don't hesitate to contact the authors directly:
 - Joshua F. Robinson ([joshua.robinson@bristol.ac.uk](mailto:joshua.robinson@bristol.ac.uk), [GitHub page](https://github.com/tranqui))
 - Richard P. Sear ([r.sear@surrey.ac.uk](mailto:r.sear@surrey.ac.uk), [website](https://www.richardsear.me))
 
