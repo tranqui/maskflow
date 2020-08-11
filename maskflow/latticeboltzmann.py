@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 '''
 This is a modified version of a LB python code for 2D flow around obstacles by
 # 

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 '''
 Impact on 2D fibre simulations
 RPS June to August 2020 www.richardsear.me
