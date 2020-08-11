@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/278852150.svg)](https://zenodo.org/badge/latestdoi/278852150)
+
 > ### <img src="https://www.emoji.co.uk/files/phantom-open-emojis/symbols-phantom/13025-warning-sign.png" width="35" height="35" /> 11th August 2020: We are continually improving this code and its documentation, so check back later for improvements.
 
 # maskflow
