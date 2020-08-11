@@ -16,6 +16,7 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 # dynamic_viscosity = np.poly1d(np.polyfit(RawData.temp, RawData.dynamic_viscosity, fit_degree))
 # kinematic_viscosity = np.poly1d(np.polyfit(RawData.temp, RawData.kinematic_viscosity, fit_degree))
 
+# Only implemented for room temperature currently
 dynamic_viscosity = lambda T: 1.8e-5 # Pa s
 
 boltzmann_constant = 1.38e-23 # J / K
