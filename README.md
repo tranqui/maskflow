@@ -9,7 +9,7 @@
 
 This package accompanies a manuscript available on a preprint server (awaiting submission to an academic journal):
 
-* Robinson *et al* "Efficacy of face coverings in reducing transmission of COVID-19: calculations based on models of droplet capture" [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) (2020).
+* Robinson *et al* "Efficacy of face coverings in reducing transmission of COVID-19: calculations based on models of droplet capture" [arXiv:2008.04995](https://arxiv.org/abs/2008.04995) (2020).
 
 The theory is described in detail there, along with references for further reading.
 
