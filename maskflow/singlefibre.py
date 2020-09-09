@@ -153,6 +153,9 @@ if __name__ == '__main__':
     # add a comma between entries to aid parsing
     np.set_string_function(lambda x: repr(x).replace('(', '').replace(')', '').replace('array', '').replace("       ", ' ') , repr=False)
 
+    if not args.stokes:
+        args.stokes = standard_stokes_number(2e-6*args.radius, 2e-6*args.fibre_radius, args.flow_speed)
+
     print('             particle_radius:', args.radius)
     print('                fibre_radius:', args.fibre_radius)
     print('                       alpha:', args.alpha) 
@@ -164,9 +167,6 @@ if __name__ == '__main__':
     print('                      stokes:', args.stokes)
     print('              outer_boundary:', flow.l * args.fibre_radius)
     print()
-
-    if not args.stokes:
-        args.stokes = standard_stokes_number(2e-6*args.radius, 2e-6*args.fibre_radius, args.flow_speed)
 
     if args.full:
         lam, lam_error = find_lambda(args.niters, flow, R, args.stokes, args.time, args.step, args.verbose)
