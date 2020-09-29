@@ -42,9 +42,9 @@ class Fabric:
         self.face_speed = (1 - self.volume_fraction)*self.flow_speed
         self.mask_area = 190e-4 # m^2/s
         self.flow_rate = 60e3 * self.mask_area * self.face_speed / (1-leakage) # litres/min
-        print('flow_speed:', self.flow_speed)
-        print('face_speed:', self.face_speed)
-        print(' flow_rate:', self.flow_rate)
+        # print('flow_speed:', self.flow_speed)
+        # print('face_speed:', self.face_speed)
+        # print(' flow_rate:', self.flow_rate)
 
         self.inertial_lambda = LambdaInterpolator(1e-6*np.array(data['particle_diameters']),
                                                   1e-6*np.array(data['lambda']))
