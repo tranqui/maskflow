@@ -52,14 +52,20 @@ class Fabric:
         self.temperature = temperature
         self.leakage = leakage
 
-    def effective_single_fibre_lambda(self, particle_diameter):
-        return self.diffusion_lambda(particle_diameter) + self.inertial_lambda(particle_diameter)
+    def effective_single_fibre_lambda(self, particle_diameter,
+                                      include_diffusion=True,
+                                      include_inertia=True):
+        efficiency = include_diffusion*self.diffusion_lambda(particle_diameter)
+        if include_inertia: efficiency += self.inertial_lambda(particle_diameter)
+        return efficiency
 
-    def penetration_depth(self, particle_diameter):
-        return (1 - self.volume_fraction) / (self.fibre_number_density * self.effective_single_fibre_lambda(particle_diameter))
+    def penetration_depth(self, particle_diameter,
+                          include_diffusion=True, include_inertia=True):
+        return (1 - self.volume_fraction) / (self.fibre_number_density * self.effective_single_fibre_lambda(particle_diameter, include_diffusion, include_inertia))
 
-    def penetration(self, particle_diameter, filter_thickness):
-        return self.leakage + (1-self.leakage)*np.exp(-filter_thickness / self.penetration_depth(particle_diameter))
+    def penetration(self, particle_diameter, filter_thickness,
+                    include_diffusion=True, include_inertia=True):
+        return self.leakage + (1-self.leakage)*np.exp(-filter_thickness / self.penetration_depth(particle_diameter, include_diffusion, include_inertia))
 
     def effectiveness(self, exhaled_droplet_distribution,
                       filter_thickness=1e-3,
@@ -118,7 +124,7 @@ class Fabric:
         """
         K = self.hydrodynamic_factor
         Pe_div_df = self.flow_speed / diffusion_coefficient(particle_diameter, self.temperature)
-        lam = 2.9*(K*Pe_div_df**2)**(-1/3) * self.df_power(1-2/3) + 0.624/Pe_div_df + 1.24*particle_diameter**(2/3) / np.sqrt(K*Pe_div_df) * self.df_power(1-7/6)
+        lam = 2.9*(K*Pe_div_df**2)**(-1/3) * self.df_power(1-2/3) + 0.624/Pe_div_df + 1.24*particle_diameter**(2/3) / np.sqrt(K*Pe_div_df) * self.df_power(1-1/6)
         return lam
 
     # @property
