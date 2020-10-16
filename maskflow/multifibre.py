@@ -129,10 +129,25 @@ if __name__ == '__main__':
         # Extrapolate beyond Kuwabara regime with a simple linear fit:
         # We do not require accuracy in this region as the penetration is so small, however we
         # do require it to decrease monotonically to zero and a linear fit suffices for this.
-        dp1, dp2 = particle_diameters[select][-2:]
-        lam1, lam2 = lam[select][-2:]
-        dp_after = particle_diameters[~select]
-        lam[~select] = lam2 + (lam2-lam1) * (dp_after-dp2)/(dp2-dp1) #l[select][-1]
+        try:
+            dp1, dp2 = particle_diameters[select][-2:]
+            lam1, lam2 = lam[select][-2:]
+            dp_after = particle_diameters[~select]
+            lam[~select] = lam2 + (lam2-lam1) * (dp_after-dp2)/(dp2-dp1)
+        except:
+            # Fibre is too small to resolve detail (and probably we don't care about fibres this
+            # small) so we'll have to extrapolate later.
+            # This should only happen for very large volume fractions (>~ 0.5).
+            lam[:] = np.nan
+
+    # If any fibre sizes were too small to resolve the single-fibre efficiency, extrapolate to populate them.
+    if np.any(np.isnan(sampled_lambdas)):
+        for col in sampled_lambdas.T:
+            select = ~np.isnan(col)
+            df1, df2 = sampled_fibre_diameters[select][:2]
+            lam1, lam2 = col[select][:2]
+            df_before = sampled_fibre_diameters[~select]
+            col[~select] = lam1 + (lam2-lam1) * (df_before-df1)/(df2-df1)
 
     averaged_lambda = np.empty(particle_diameters.shape)
 
