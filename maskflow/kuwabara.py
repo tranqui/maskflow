@@ -232,7 +232,6 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     from matplotlib.patches import Circle
 
-    alpha = 0.1
     R = 0.2
     alpha = 0.15
     flow = KuwabaraFlowField(alpha)
