@@ -1,15 +1,14 @@
 [![DOI](https://zenodo.org/badge/278852150.svg)](https://zenodo.org/badge/latestdoi/278852150)
 
-> ### <img src="https://www.emoji.co.uk/files/phantom-open-emojis/symbols-phantom/13025-warning-sign.png" width="35" height="35" /> 11th August 2020: We are continually improving this code and its documentation, so check back later for improvements.
-
 # maskflow
 ## A python package to evaluate the filtration properties of face masks and coverings.
 
 ## Overview
 
-This package accompanies a manuscript available on a preprint server (awaiting submission to an academic journal):
+This package accompanies two manuscripts:
 
-* Robinson *et al* "Efficacy of face coverings in reducing transmission of COVID-19: calculations based on models of droplet capture" [arXiv:2008.04995](https://arxiv.org/abs/2008.04995) (2020).
+* Robinson *et al* "Efficacy of face coverings in reducing transmission of COVID-19: calculations based on models of droplet capture", Physics of Fluids 33, 043112 (2021). Preprint (open-access): https://arxiv.org/abs/2008.04995.
+* Robinson *et al* "How effective are face coverings in reducing transmission of COVID-19?", Preprint (open-access): https://arxiv.org/abs/2012.01314.
 
 The theory is described in detail there, along with references for further reading.
 
@@ -111,6 +110,8 @@ For the final step we take the results of previous steps and determine the fabri
     plt.ylabel('collection efficiency')
     plt.ylim([0, 1])
     plt.show()
+
+We include previously obtained fibre data suitable for surgical masks in the subfolder `surgicalmaskdata`, and the script `surgicalmask.py` has a complete example giving the filtration profile of two surgical masks (full details in the Physics of Fluids paper above). Finally, we include the script `effectiveness.py` which calculates practical mask efficacy for one surgical mask after taken into account biological factors considered in our second manuscript. This calculation considers the distribution of exhaled aerosols, the probability of aerosol deposition in the inhaler's respiratory tract and the viral load of the exhaler.
 
 ### Lattice-Boltzmann simulations
 
