@@ -187,6 +187,23 @@ class KuwabaraFlowField:
         return limit_trajectory[1:] if return_angles else limit_trajectory[-1]
 
     def find_trajectory_full(self, R, St, r0, th0, tmax=100, max_step=1):
+        if St == 0:
+            dxdt2 = lambda r,th: np.array([self.u(r,th), self.v(r,th)/r])
+            dxdt = lambda t,x: dxdt2(*x)
+
+            penetrate = lambda t,x: self.l - x[0]
+            penetrate.terminal = True
+            penetrate.direction = -1
+            events = (penetrate,)
+
+            with np.errstate(divide='ignore', invalid='ignore'):
+                x0 = [r0, th0]
+                trajectory = integrate.solve_ivp(dxdt, [0, tmax], x0, #jac=jacobian,
+                                                 events=events, max_step=max_step,
+                                                 vectorized=True, dense_output=True)
+
+            return trajectory
+
         dudt = lambda r,th,ur,ut: -(ur - self.u(r,th))/St + ut**2/r
         dvdt = lambda r,th,ur,ut: -(ut - self.v(r,th))/St - ur*ut/r
         duvdt = lambda r,th,ur,ut: [dudt(r,th,ur,ut), dvdt(r,th,ur,ut)]

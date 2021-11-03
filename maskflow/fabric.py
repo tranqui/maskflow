@@ -3,6 +3,8 @@
 try: from .multifibre import *
 except: from multifibre import *
 
+from scipy.interpolate import interp1d
+
 def mechanical_mobility(diameter, temperature=standard_temp):
     """
     Args:
@@ -53,19 +55,22 @@ class Fabric:
         self.leakage = leakage
 
     def effective_single_fibre_lambda(self, particle_diameter,
+                                      diffusion_pore_correction=1,
                                       include_diffusion=True,
                                       include_inertia=True):
-        efficiency = include_diffusion*self.diffusion_lambda(particle_diameter)
+        efficiency = include_diffusion*self.diffusion_lambda(particle_diameter, diffusion_pore_correction)
         if include_inertia: efficiency += self.inertial_lambda(particle_diameter)
         return efficiency
 
     def penetration_depth(self, particle_diameter,
+                          diffusion_pore_correction=1,
                           include_diffusion=True, include_inertia=True):
-        return (1 - self.volume_fraction) / (self.fibre_number_density * self.effective_single_fibre_lambda(particle_diameter, include_diffusion, include_inertia))
+        return (1 - self.volume_fraction) / (self.fibre_number_density * self.effective_single_fibre_lambda(particle_diameter, diffusion_pore_correction, include_diffusion, include_inertia))
 
     def penetration(self, particle_diameter, filter_thickness,
+                    diffusion_pore_correction=1,
                     include_diffusion=True, include_inertia=True):
-        return self.leakage + (1-self.leakage)*np.exp(-filter_thickness / self.penetration_depth(particle_diameter, include_diffusion, include_inertia))
+        return self.leakage + (1-self.leakage)*np.exp(-filter_thickness / self.penetration_depth(particle_diameter, diffusion_pore_correction, include_diffusion, include_inertia))
 
     def effectiveness(self, exhaled_droplet_distribution,
                       filter_thickness=1e-3,
@@ -106,7 +111,7 @@ class Fabric:
     # def peclet_number(self):
     #     return self.fibre_diameter * self.flow_speed / diffusion_coefficient(self.particle_diameter, self.temperature)
 
-    def diffusion_lambda(self, particle_diameter):
+    def diffusion_lambda(self, particle_diameter, diffusion_pore_correction=1):
         """Average the single-fibre result over the fibre distribution.
 
         We take the single-fibre result of Stechkina and Fuchs (1966):
@@ -118,12 +123,14 @@ class Fabric:
 
         Args:
             particle_diameter: diameter of incoming particles (m)
+            diffusion_pore_correction: amount to rescale flow speed/Peclet number by to account
+                                       for the increased flow through inter-yarn pores
         Returns:
             lambda: characterising the effective efficiency of a single-fibre by the size of
                     its capture window (m)
         """
         K = self.hydrodynamic_factor
-        Pe_div_df = self.flow_speed / diffusion_coefficient(particle_diameter, self.temperature)
+        Pe_div_df = diffusion_pore_correction * self.flow_speed / diffusion_coefficient(particle_diameter, self.temperature)
         lam = 2.9*(K*Pe_div_df**2)**(-1/3) * self.df_power(1-2/3) + 0.624/Pe_div_df + 1.24*particle_diameter**(2/3) / np.sqrt(K*Pe_div_df) * self.df_power(1-1/6)
         return lam
 
@@ -131,6 +138,94 @@ class Fabric:
     # def most_penetrating(self):
     #     select = np.argmin(self.single_efficiency)
     #     return self.particle_diameter[select], self.single_efficiency[select]
+
+def gradient(f, x, dx=1e-8, args=[]):
+    """Numerically take the gradient of a scalar function at point x.
+
+    This uses a central finite difference scheme to numerically find the derivatives.
+    The objective function must return a scalar, but the inputs can be either a scalar
+    or a vector.
+
+    Args:
+        f: objective function to differentiate
+        x: scalar or vector argument to evaluate the derivatives
+        dx: precision of derivatives for the finite difference method
+        args: additional arguments to f
+    Returns:
+        g: gradient of the function at point x, with the same dimensionality as input x
+    """
+    f0 = f(x, *args)
+    try: g = np.empty((x.size,len(f0)), dtype=np.longdouble)
+    except: g = np.empty(x.size, dtype=np.longdouble)
+    shape = x.shape
+
+    x = x.reshape(-1)
+    q = g.copy()
+    for i in range(x.size):
+        x0 = x[i]
+        x[i] += dx
+        g[i] = (f(x.reshape(shape), *args)-f0) / (x[i]-x0) # using exact step after rounding
+        q[i] = f(x.reshape(shape), *args)
+        x[i] = x0
+
+    try: return g.reshape(shape)
+    except: return g
+
+def penetration(paths, dp, flow_speed, df, df_sigma,
+                thickness, alpha, pore_permeability=None,
+                thickness_error=0, alpha_error=0, pore_permeability_error=0,
+                return_error=False):
+    """Calculate the penetration for a fabric of an arbitrary volume fraction by interpolating
+    over available data.
+
+    Args:
+        paths: single-fibre efficiency data at various sampled volume fractions
+        dp: particle diameter (m)
+        flow_speed
+        df
+        df_sigma
+        thickness (mm)
+        alpha
+        pore_permeability
+        thickness_error
+        alpha_error
+        pore_permeability_error
+        return_error: whether to calculate the error in the penetration.
+    Returns
+        the penetration at each particle diameter
+        error in penetration (from propagating stated uncertainties) if return_error=True
+    """
+    if not return_error:
+        sample_volume_fractions = [float(path.split('alpha=')[-1].split('_')[0]) for path in paths]
+
+        p = []
+        for path in paths:
+            fabric = Fabric(path)
+            if pore_permeability is not None:
+                p += [fabric.penetration(dp, 1e-3*thickness,
+                                         diffusion_pore_correction=1/pore_permeability)]
+            else:
+                p += [fabric.penetration(dp, 1e-3*thickness)]
+
+        return interp1d(sample_volume_fractions, np.array(p).T,
+                        'quadratic', fill_value='extrapolate')(alpha)
+
+    else:
+        f = lambda x: penetration(paths, dp, flow_speed, df, df_sigma, *x)
+
+        if pore_permeability is not None:
+            y = np.array((thickness, alpha, pore_permeability))
+            y_err = np.array((1e-3*thickness_error, alpha_error, pore_permeability_error))
+        else:
+            y = np.array((thickness, alpha))
+            y_err = np.array((1e-3*thickness_error, alpha_error))
+
+        p = f(y)
+        jacobian = gradient(f, y)
+        cov_y = np.diag(y_err**2)
+        p_err = np.sqrt(np.diag(jacobian.T.dot(cov_y.dot(jacobian))))
+
+        return p, p_err
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt

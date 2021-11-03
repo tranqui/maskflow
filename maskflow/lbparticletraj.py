@@ -85,7 +85,6 @@ with np.load(filename) as npzfile:
     uff=u_vec[0,:,:]
     vff=u_vec[1,:,:]
 
-#
     plot_obs_x=npzfile['x_obs']
     plot_obs_y=npzfile['y_obs']
     cx=npzfile['disc_centres_x']
