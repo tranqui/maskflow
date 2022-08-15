@@ -186,7 +186,7 @@ class KuwabaraFlowField:
         limit_trajectory = self.perturbative_limit_trajectory(R, St)
         return limit_trajectory[1:] if return_angles else limit_trajectory[-1]
 
-    def find_trajectory_full(self, R, St, r0, th0, tmax=100, max_step=1):
+    def find_trajectory_full(self, R, St, r0, th0, tmax=100, max_step=1, **kwargs):
         if St == 0:
             dxdt2 = lambda r,th: np.array([self.u(r,th), self.v(r,th)/r])
             dxdt = lambda t,x: dxdt2(*x)
@@ -200,7 +200,8 @@ class KuwabaraFlowField:
                 x0 = [r0, th0]
                 trajectory = integrate.solve_ivp(dxdt, [0, tmax], x0, #jac=jacobian,
                                                  events=events, max_step=max_step,
-                                                 vectorized=True, dense_output=True)
+                                                 vectorized=True, dense_output=True,
+                                                 **kwargs)
 
             return trajectory
 
@@ -236,7 +237,8 @@ class KuwabaraFlowField:
             x0 = [r0, th0, self.u(r0,th0), self.v(r0,th0)]
             trajectory = integrate.solve_ivp(dxdt, [0, tmax], x0, #jac=jacobian,
                                              events=events, max_step=max_step,
-                                             vectorized=True, dense_output=True)
+                                             vectorized=True, dense_output=True,
+                                             **kwargs)
 
         return trajectory
 
